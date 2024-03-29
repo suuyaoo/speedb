@@ -1107,8 +1107,16 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
       cfd->ioptions()->compaction_filter;
   std::unique_ptr<CompactionFilter> compaction_filter_from_factory = nullptr;
   if (compaction_filter == nullptr) {
+    const Slice* start = nullptr;
+    const Slice* end = nullptr;
+    if(sub_compact->start.has_value()) {
+        start = &(*start);
+    }
+    if(sub_compact->start.has_value()) {
+        end = &(*end);
+    }
     compaction_filter_from_factory =
-        sub_compact->compaction->CreateCompactionFilter();
+        sub_compact->compaction->CreateCompactionFilter(start, end);
     compaction_filter = compaction_filter_from_factory.get();
   }
   if (compaction_filter != nullptr && !compaction_filter->IgnoreSnapshots()) {

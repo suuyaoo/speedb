@@ -967,7 +967,8 @@ class Version {
   Status GetTableProperties(const ReadOptions& read_options,
                             std::shared_ptr<const TableProperties>* tp,
                             const FileMetaData* file_meta,
-                            const std::string* fname = nullptr) const;
+                            const std::string* fname = nullptr,
+                            bool no_io = true) const;
 
   // REQUIRES: lock is held
   // On success, *props will be populated with all SSTables' table properties.

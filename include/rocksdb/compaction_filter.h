@@ -18,6 +18,8 @@
 #include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/types.h"
 #include "rocksdb/wide_columns.h"
+#include "rocksdb/slice.h"
+#include "rocksdb/table_properties.h"
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -166,6 +168,17 @@ class CompactionFilter : public Customizable {
     uint32_t column_family_id;
     // Reason this table file is being created.
     TableFileCreationReason reason;
+
+    // The range of the compaction.
+    Slice start_key;
+    Slice end_key;
+    bool is_end_key_inclusive;
+
+    // File numbers of all involved SST files.
+    std::vector<uint64_t> file_numbers;
+
+    // Properties of all involved SST files.
+    std::vector<std::shared_ptr<const TableProperties>> table_properties;
   };
 
   virtual ~CompactionFilter() {}

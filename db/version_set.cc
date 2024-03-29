@@ -1554,13 +1554,14 @@ void LevelIterator::InitFileIterator(size_t new_file_index) {
 Status Version::GetTableProperties(const ReadOptions& read_options,
                                    std::shared_ptr<const TableProperties>* tp,
                                    const FileMetaData* file_meta,
-                                   const std::string* fname) const {
+                                   const std::string* fname,
+                                   bool no_io) const {
   auto table_cache = cfd_->table_cache();
   auto ioptions = cfd_->ioptions();
   Status s = table_cache->GetTableProperties(
       file_options_, read_options, cfd_->internal_comparator(), *file_meta, tp,
       mutable_cf_options_.block_protection_bytes_per_key,
-      mutable_cf_options_.prefix_extractor, true /* no io */);
+      mutable_cf_options_.prefix_extractor, no_io /* no io */);
   if (s.ok()) {
     return s;
   }

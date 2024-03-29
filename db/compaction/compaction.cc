@@ -760,7 +760,8 @@ uint64_t Compaction::OutputFilePreallocationSize() const {
                   preallocation_size + (preallocation_size / 10));
 }
 
-std::unique_ptr<CompactionFilter> Compaction::CreateCompactionFilter() const {
+std::unique_ptr<CompactionFilter> Compaction::CreateCompactionFilter(
+  const Slice* start, const Slice* end) const {
   if (!cfd_->ioptions()->compaction_filter_factory) {
     return nullptr;
   }
@@ -777,6 +778,21 @@ std::unique_ptr<CompactionFilter> Compaction::CreateCompactionFilter() const {
   context.is_bottommost_level = bottommost_level_;
   context.column_family_id = cfd_->GetID();
   context.reason = TableFileCreationReason::kCompaction;
+  context.start_key =
+      (start == nullptr) ? GetSmallestUserKey() : ExtractUserKey(*start);
+  context.end_key =
+      (end == nullptr) ? GetLargestUserKey() : ExtractUserKey(*end);
+  context.is_end_key_inclusive = (end == nullptr);
+  const ReadOptions read_options(Env::IOActivity::kCompaction);
+  for (auto l = inputs_.begin(); l != inputs_.end(); ++l) {
+    for (auto f = l->files.begin(); f != l->files.end(); ++f) {
+        std::shared_ptr<const TableProperties> tp;
+        Status s = input_version_->GetTableProperties(read_options, &tp, *f, nullptr, false /*no_io*/);
+        assert(s.ok());
+        context.file_numbers.push_back((*f)->fd.GetNumber());
+        context.table_properties.push_back(tp);
+    }
+  }
   return cfd_->ioptions()->compaction_filter_factory->CreateCompactionFilter(
       context);
 }
