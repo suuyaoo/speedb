@@ -86,6 +86,7 @@ class ArenaWrappedDBIter : public Iterator {
   void Prev() override { db_iter_->Prev(); }
   Slice key() const override { return db_iter_->key(); }
   Slice value() const override { return db_iter_->value(); }
+  bool seqno(SequenceNumber* no) const override { return db_iter_->seqno(no); }
   const WideColumns& columns() const override { return db_iter_->columns(); }
   Status status() const override { return db_iter_->status(); }
   Slice timestamp() const override { return db_iter_->timestamp(); }

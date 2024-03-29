@@ -37,6 +37,7 @@
 #include "rocksdb/cleanable.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/status.h"
+#include "rocksdb/types.h"
 #include "rocksdb/wide_columns.h"
 
 namespace ROCKSDB_NAMESPACE {
@@ -103,6 +104,11 @@ class Iterator : public Cleanable {
   // SeekToFirst/SeekToLast/Seek/SeekForPrev/Next/Prev operation).
   // REQUIRES: Valid()
   virtual Slice value() const = 0;
+
+  // Return the sequence number for the current entry if it's available.
+  // Return false if it's not available.
+  // REQUIRES: Valid()
+  virtual bool seqno(SequenceNumber* /*seqno*/) const { return false; }
 
   // Return the wide columns for the current entry.  If the entry is a
   // wide-column entity, return it as-is; if it is a plain key-value, return it

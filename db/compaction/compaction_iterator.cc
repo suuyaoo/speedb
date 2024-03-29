@@ -350,8 +350,9 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
         existing_col = &existing_columns;
       }
 
-      decision = compaction_filter_->FilterV3(
-          level_, filter_key, value_type, existing_val, existing_col,
+      SequenceNumber seqno = ikey_.sequence;
+      decision = compaction_filter_->FilterV3_1(
+          level_, filter_key, seqno, value_type, existing_val, existing_col,
           &compaction_filter_value_, &new_columns,
           compaction_filter_skip_until_.rep());
     }

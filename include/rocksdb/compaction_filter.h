@@ -262,6 +262,14 @@ class CompactionFilter : public Customizable {
     }
   }
 
+  virtual Decision FilterV2_1(int level, const Slice& key,
+                            SequenceNumber /*seqno*/, ValueType value_type,
+                            const Slice& existing_value, std::string* new_value,
+                            std::string* skip_until) const {
+    return FilterV2(level, key, value_type, existing_value, new_value,
+                    skip_until);
+  }
+
   // Wide column aware unified API. Called for plain values, merge operands, and
   // wide-column entities; the `value_type` parameter indicates the type of the
   // key-value. When the key-value is a plain value or a merge operand, the
@@ -301,6 +309,29 @@ class CompactionFilter : public Customizable {
     }
 
     return FilterV2(level, key, value_type, *existing_value, new_value,
+                    skip_until);
+  }
+
+  virtual Decision FilterV3_1(
+      int level, const Slice& key,
+      SequenceNumber seqno, ValueType value_type,
+      const Slice* existing_value, const WideColumns* existing_columns,
+      std::string* new_value,
+      std::vector<std::pair<std::string, std::string>>* /* new_columns */,
+      std::string* skip_until) const {
+#ifdef NDEBUG
+    (void)existing_columns;
+#endif
+
+    assert(!existing_value || !existing_columns);
+    assert(value_type == ValueType::kWideColumnEntity || existing_value);
+    assert(value_type != ValueType::kWideColumnEntity || existing_columns);
+
+    if (value_type == ValueType::kWideColumnEntity) {
+      return Decision::kKeep;
+    }
+
+    return FilterV2_1(level, key, seqno, value_type, *existing_value, new_value,
                     skip_until);
   }
 

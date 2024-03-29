@@ -163,6 +163,11 @@ class DBIter final : public Iterator {
 
     return value_;
   }
+  bool seqno(SequenceNumber* no) const override {
+    assert(valid_);
+    *no = ikey_.sequence;
+    return true;
+  }
 
   const WideColumns& columns() const override {
     assert(valid_);
