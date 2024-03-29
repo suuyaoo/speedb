@@ -154,6 +154,8 @@ class WriteBatchInternal {
 
   static Status SetContents(WriteBatch* batch, const Slice& contents);
 
+  static Status AppendContents(WriteBatch* dst, const Slice& content);
+
   static Status CheckSlicePartsLength(const SliceParts& key,
                                       const SliceParts& value);
 
