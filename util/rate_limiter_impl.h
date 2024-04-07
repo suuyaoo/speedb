@@ -36,6 +36,8 @@ class GenericRateLimiter : public RateLimiter {
   // This API allows user to dynamically change rate limiter's bytes per second.
   virtual void SetBytesPerSecond(int64_t bytes_per_second) override;
 
+  void SetAutoTuned(bool auto_tuned) override;
+
   // Request for token to write bytes. If this request can not be satisfied,
   // the call is blocked. Caller is responsible to make sure
   // bytes <= GetSingleBurstBytes() and bytes >= 0. Negative bytes
@@ -95,6 +97,11 @@ class GenericRateLimiter : public RateLimiter {
     return rate_bytes_per_sec_.load(std::memory_order_relaxed);
   }
 
+  virtual bool GetAutoTuned() const override {
+    MutexLock g(&request_mutex_);
+    return auto_tuned_;
+  }
+
   virtual void TEST_SetClock(std::shared_ptr<SystemClock> clock) {
     MutexLock g(&request_mutex_);
     clock_ = std::move(clock);
@@ -107,6 +114,7 @@ class GenericRateLimiter : public RateLimiter {
   int64_t CalculateRefillBytesPerPeriodLocked(int64_t rate_bytes_per_sec);
   Status TuneLocked();
   void SetBytesPerSecondLocked(int64_t bytes_per_second);
+  void SetAutoTunedLocked(bool auto_tuned);
 
   uint64_t NowMicrosMonotonicLocked() {
     return clock_->NowNanos() / std::milli::den;

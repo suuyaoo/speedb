@@ -99,12 +99,21 @@ void GenericRateLimiter::SetBytesPerSecond(int64_t bytes_per_second) {
   SetBytesPerSecondLocked(bytes_per_second);
 }
 
+void GenericRateLimiter::SetAutoTuned(bool auto_tuned) {
+  MutexLock g(&request_mutex_);
+  SetAutoTunedLocked(auto_tuned);
+}
+
 void GenericRateLimiter::SetBytesPerSecondLocked(int64_t bytes_per_second) {
   assert(bytes_per_second > 0);
   rate_bytes_per_sec_.store(bytes_per_second, std::memory_order_relaxed);
   refill_bytes_per_period_.store(
       CalculateRefillBytesPerPeriodLocked(bytes_per_second),
       std::memory_order_relaxed);
+}
+
+void GenericRateLimiter::SetAutoTunedLocked(bool auto_tuned) {
+  auto_tuned_ = auto_tuned;
 }
 
 void GenericRateLimiter::Request(int64_t bytes, const Env::IOPriority pri,
